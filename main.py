@@ -47,6 +47,11 @@ def main():
     if "items_prices" not in st.session_state:
         st.session_state.items_prices = {}
 
+    # Function to handle deletion of items
+    def delete_item(item_name: str):
+        if item_name in st.session_state.items_prices:
+            del st.session_state.items_prices[item_name]
+
     with st.container():
         st.subheader("Items and Prices")
 
@@ -64,8 +69,19 @@ def main():
         df = pd.DataFrame([(item, price) for item, price in st.session_state.items_prices.items()],
                             columns=["Item", "Price"])
 
-        # Display the current items and prices
-        st.dataframe(df)
+        # Display the current items and prices with delete buttons
+        if not df.empty:
+            st.write("**Items and Prices:**")
+            for index, row in df.iterrows():
+                col1, col2, col3 = st.columns([5, 1, 2])
+                with col1:
+                    st.write(row['Item'])
+                with col2:
+                    st.write(f"Rs {row['Price']:.2f}")
+                with col3:
+                    if st.button("Delete", key=f"delete_{index}"):
+                        delete_item(row['Item'])
+                        st.experimental_rerun()
 
     total_amount = st.number_input('Total target amount (Rs)', min_value=1, step=1)
     total_receipts = st.number_input('Number of receipts', min_value=1, step=1)
